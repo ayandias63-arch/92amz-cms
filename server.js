@@ -38,6 +38,16 @@ fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/admin.html", exigirAdmin, function (req, res) {
+
+    res.sendFile(
+        path.join(
+            PUBLIC_DIR,
+            "admin.html"
+        )
+    );
+});
+
 // Arquivos públicos
 app.use(express.static(PUBLIC_DIR));
 
@@ -892,10 +902,6 @@ footer {
                 Início
             </a>
 
-            <a href="/admin">
-                Administração
-            </a>
-
         </nav>
 
     </div>
@@ -1462,7 +1468,7 @@ app.post(
 
             const { data, error } = await supabase
                 .from("noticias")
-                .insert(noticia)
+                .insert([noticia])
                 .select()
                 .single();
 
@@ -1537,6 +1543,15 @@ app.delete(
                 });
             }
 
+            const { error: excluirError } = await supabase
+                .from("noticias")
+                .delete()
+                .eq("id", id);
+
+            if (excluirError) {
+                throw excluirError;
+            }
+
             if (noticia.imagem) {
 
                 const caminhoImagem =
@@ -1569,15 +1584,6 @@ app.delete(
 
                     }
                 }
-            }
-
-            const { error: excluirError } = await supabase
-                .from("noticias")
-                .delete()
-                .eq("id", id);
-
-            if (excluirError) {
-                throw excluirError;
             }
 
             res.json({
