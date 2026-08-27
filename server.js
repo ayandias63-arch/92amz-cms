@@ -1451,12 +1451,84 @@ app.post(
 
             let imagem = null;
 
-            if (req.file) {
+if (req.file) {
 
-                imagem =
-                    "/uploads/" +
-                    req.file.filename;
-            }
+    try {
+
+        // Nombre seguro y único para la imagen
+        const extensao =
+            path.extname(req.file.originalname || "").toLowerCase() || ".jpg";
+
+        const nomeArquivo =
+            `${Date.now()}-${crypto.randomBytes(8).toString("hex")}${extensao}`;
+
+        const caminhoStorage =
+            `imagens/${nomeArquivo}`;
+
+        // Funciona tanto si Multer usa memoryStorage
+        // como si actualmente guarda el archivo temporalmente en disco.
+        let arquivoBuffer = req.file.buffer;
+
+        if (!arquivoBuffer && req.file.path) {
+            arquivoBuffer = fs.readFileSync(req.file.path);
+        }
+
+        if (!arquivoBuffer) {
+            throw new Error("Não foi possível ler o arquivo enviado.");
+        }
+
+        // Enviar imagem para Supabase Storage
+        const { error: uploadError } =
+            await supabase.storage
+                .from("noticias")
+                .upload(
+                    caminhoStorage,
+                    arquivoBuffer,
+                    {
+                        contentType:
+                            req.file.mimetype || "image/jpeg",
+                        upsert: false
+                    }
+                );
+
+        if (uploadError) {
+            throw uploadError;
+        }
+
+        // Obter URL pública
+        const { data: publicData } =
+            supabase.storage
+                .from("noticias")
+                .getPublicUrl(caminhoStorage);
+
+        imagem =
+            publicData.publicUrl;
+
+        // Se Multer criou um arquivo temporário local,
+        // removê-lo depois do upload.
+        if (req.file.path && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+
+        console.log(
+            "Imagem enviada para Supabase Storage:",
+            imagem
+        );
+
+    } catch (erroImagem) {
+
+        console.error(
+            "Erro ao enviar imagem para Supabase Storage:",
+            erroImagem
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                "Não foi possível enviar a imagem."
+        });
+    }
+}
 
             const agora =
                 new Date().toISOString();
