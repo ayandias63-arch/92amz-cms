@@ -1375,7 +1375,28 @@ app.get("/", async function (req, res) {
         });
     }
 });
+// ======================================================
+// API — LISTAR NOTÍCIAS
+// ======================================================
 
+app.get("/api/noticias", async function (req, res) {
+    try {
+        const noticias = await lerNoticias();
+
+        res.json({
+            success: true,
+            noticias: noticias
+        });
+
+    } catch (erro) {
+        console.error("Erro ao listar notícias:", erro);
+
+        res.status(500).json({
+            success: false,
+            message: "Erro ao carregar notícias."
+        });
+    }
+});
 // ======================================================
 // API — PUBLICAR NOTÍCIA
 // ======================================================
