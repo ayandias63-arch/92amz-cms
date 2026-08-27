@@ -126,8 +126,8 @@ function normalizarNoticia(noticia) {
         conteudo: noticia.conteudo,
         imagem: noticia.imagem,
         status: noticia.status,
-        criadoEm: noticia.criadoEm,
-        atualizadoEm: noticia.atualizadoEm
+        criadoEm: noticia.criadoEm || noticia.criado_em,
+        atualizadoEm: noticia.atualizadoEm || noticia.atualizado_em
     };
 }
 
@@ -1459,10 +1459,10 @@ app.post(
                 status:
                     "publicada",
 
-                criadoEm:
+                criado_em:
                     agora,
 
-                atualizadoEm:
+                atualizado_em:
                     agora
             };
 
