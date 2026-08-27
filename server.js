@@ -1342,7 +1342,7 @@ app.get("/api/status", function (req, res) {
 // API — LISTAR NOTÍCIAS
 // ======================================================
 
-app.get("/api/noticias", exigirAdmin, async function (req, res) {
+app.get("/api/noticias", async function (req, res) {
 
     try {
 
