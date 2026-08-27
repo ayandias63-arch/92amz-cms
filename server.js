@@ -104,8 +104,9 @@ const upload = multer({
 async function lerNoticias() {
 
     const { data, error } = await supabase
-        .from("noticias")
-        .select("*");
+    .from("noticias")
+    .select("*")
+    .order("criado_em", { ascending: false });
 
     if (error) {
         throw error;
